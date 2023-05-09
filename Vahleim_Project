@@ -1,0 +1,36 @@
+library(tidyverse)
+library(tidyr)
+library(janitor)
+library(readr)
+  #Packages I will use
+
+Valheim_Food <- read_csv("C:/R/Valheim/Valheim_Food_Dataset_Annotated.csv")
+  #import the Valheim food data set
+food_cleaned <- Valheim_Food %>% select(-"Icon", -"URL")
+  #Creates a list replacing the n/a with world drop.
+food_cleaned$Crafting <- ifelse(is.na(food_cleaned$Crafting), "World Drop", food_cleaned$Crafting)
+
+foodbuff <- function(age, buff, sortby = buff) {
+  # Subset the food_cleaned data frame based on the selected age
+  df <- subset(food_cleaned, Progression == age)
+  
+  # Determine which column to sort by based on the selected sort by value
+  if(sortby == "Stamina") {
+    sort_col <- "Stamina"
+  } else if (sortby == "Health") {
+    sort_col <- "Health"
+  } else {
+    stop("Invalid sortby argument. Must be 'Stamina' or 'Health'.")
+  }
+  
+  # Sort the data frame by the selected column in descending order
+  df_sorted <- df[order(-df[,sort_col]),]
+  
+  # Return the top 5 food items
+  return(df_sorted[1:5, c(1, 8, 9, 5, 6, 2, 3, 4)])
+}
+
+#A few commands using the function
+stone_stam <- foodbuff("Stone","Stamina")
+bronze_health <- foodbuff("Bronze","Health")
+iron_health <- foodbuff("Iron","Health",sortby = "Stamina")
